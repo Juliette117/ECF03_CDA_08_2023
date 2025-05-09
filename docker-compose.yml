@@ -1,0 +1,142 @@
+services:
+  # ----------- BASE DE DONNÉES -----------
+  mysql:
+    image: mysql
+    container_name: mysql-container
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - 3307:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  redis:
+    image: redis
+    container_name: redis-container
+    ports:
+      - 6379:6379
+    networks:
+      - app-network
+
+  # ----------- SERVICES SPRING BOOT -----------
+  authentication-service:
+    build:
+      context: .
+      dockerfile: ./server/authentication-service/Dockerfile
+    expose:
+      - ${AUTHENTICATION_SERVICE_PORT}
+    ports:
+      - ${AUTHENTICATION_SERVICE_PORT}:${AUTHENTICATION_SERVICE_PORT}
+    depends_on:
+      - mysql
+      - redis
+      - client
+    environment:
+     - DB_HOST=mysql
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_SCHEMA=${DB_SCHEMA}
+      - ACTIVE_PROFILE=${ACTIVE_PROFILE}
+      - PORT=${AUTHENTICATION_SERVICE_PORT}
+    networks:
+      - app-network
+
+  common-data-service:
+    build:
+      context: .
+      dockerfile: ./server/common-data-service/Dockerfile
+    expose:
+      - ${COMMON_DATA_SERVICE_PORT}
+    ports:
+      - ${COMMON_DATA_SERVICE_PORT}:${COMMON_DATA_SERVICE_PORT}
+    depends_on:
+      - mysql
+      - redis
+      - client
+    environment:
+     - DB_HOST=mysql
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_SCHEMA=${DB_SCHEMA}
+      - ACTIVE_PROFILE=${ACTIVE_PROFILE}
+      - PORT=${AUTHENTICATION_SERVICE_PORT}
+    networks:
+      - app-network
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: ./server/payment-service/Dockerfile
+    expose:
+      - ${PAYMENT_SERVICE_PORT}
+    ports:
+      - ${PAYMENT_SERVICE_PORT}:${PAYMENT_SERVICE_PORT}
+    depends_on:
+      - mysql
+      - redis
+      - client
+    environment:
+     - DB_HOST=mysql
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_SCHEMA=${DB_SCHEMA}
+      - ACTIVE_PROFILE=${ACTIVE_PROFILE}
+      - PORT=${AUTHENTICATION_SERVICE_PORT}
+    networks:
+      - app-network
+
+  search-service:
+    build:
+      context: .
+      dockerfile: ./server/search-service/Dockerfile
+    expose:
+      - ${SEARCH_SUGGESTION_SERVICE_PORT}
+    ports:
+      - ${SEARCH_SUGGESTION_SERVICE_PORT}:${SEARCH_SUGGESTION_SERVICE_PORT}
+    depends_on:
+      - mysql
+      - redis
+      - client
+    environment:
+     - DB_HOST=mysql
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_SCHEMA=${DB_SCHEMA}
+      - ACTIVE_PROFILE=${ACTIVE_PROFILE}
+      - PORT=${AUTHENTICATION_SERVICE_PORT}
+    networks:
+      - app-network
+
+  # ----------- client -----------
+  client:
+    build:
+      context: ./client
+    expose:
+      - ${REACT_APP_PORT}
+    ports:
+      - ${REACT_APP_PORT}:${REACT_APP_PORT}
+    environment:
+      - REACT_APP_COMMON_DATA_SERVICE_PORT=${COMMON_DATA_SERVICE_PORT}
+      - REACT_APP_ENVIRONMENT=${REACT_APP_ENVIRONMENT}
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge
+

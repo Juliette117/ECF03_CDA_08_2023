@@ -63,7 +63,7 @@ Principales fonctionnalités: s'authentifier, parcourir des produits, ajouter un
 - Node.js
 - Java
 
-### Démarrer l'application avec docker-compose
+### Démarrer avec docker-compose
 
 ```
 docker-compose build
@@ -76,7 +76,9 @@ ou
 docker-compose up --build
 ```
 
-## Architecture de l'application
+Accès à l'interface utilisateur : http://localhost:3000
+
+## Architecture
 
 ### Base de données
 
@@ -89,7 +91,7 @@ L’application est composée des services suivants :
  - Client React : Interface utilisateur construite avec ReactJS. Occupe le port 3000.
  - authentication-service => Service d’authentification : Gère l’inscription, la connexion et l’authentification des utilisateurs. Occupe le port 7000.
  - common-data-service => Service de données communes : Fournit des données sur les produits. Occupe le port 9000.
- - payment-service => Service de paiement : Gère le paiement de produits. Occupe le 9050.
+ - payment-service => Service de paiement : Gère le paiement de produits. Occupe le port 9050.
  - search-service => Service de recherche : recherche à partir des entrées de l'utilisateur. Occupe le port 10000
 
 
